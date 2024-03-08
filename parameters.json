@@ -1,0 +1,19 @@
+{
+    "name":"Iris.csv",
+    "distance" :["lp","lp","lp","cosine","mahalanobis"],
+    "arguments":[
+        {"p":0},
+        {"p":1},
+        {"p":2},
+        {},
+        {}
+    ],
+    "kmeans":{},
+    "fuzzy_kmeans":{},
+    "mountain_clustering":{
+        "sigma":[0.5,1,2],
+        "beta": [0.5,1,2],
+        "l":5
+    },
+    "substractive_clustering":{}
+}

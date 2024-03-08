@@ -1,0 +1,7 @@
+{
+    "autoDocstring.guessTypes": true,
+    "autoDocstring.includeExtendedSummary": false,
+    "autoDocstring.includeName": true,
+    "autoDocstring.quoteStyle": "'''",
+    "autoDocstring.startOnNewLine": true
+}
