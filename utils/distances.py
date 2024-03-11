@@ -19,7 +19,7 @@ def distance_lp(x: np.ndarray ,
     assert x.shape==y.shape
 
     if p==0:
-        distancia=np.sum(np.max(x,y))
+        distancia=np.sum(np.maximum(x,y))
     else:
         distancia=np.sum(np.abs(x-y)**p)**(1/p)
 

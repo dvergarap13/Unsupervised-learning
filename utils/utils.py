@@ -69,16 +69,16 @@ def read_data(name:str)->pd.DataFrame:
         pd.DataFrame: data
     '''
 
-    path= "/data/"+name
+    path= "data/"+name
 
     
     if name.endswith(".csv") or name.endswith(".txt"):
-        reader = pd.read_csv(path, sep = None, iterator = True)
+        reader = pd.read_csv(path, sep = None, iterator = True,engine='python')
         inferred_sep = reader._engine.data.dialect.delimiter
         data=pd.read_csv(path,sep=inferred_sep)
-    if name.endswith(".xslx") or name.endswith(".xls"):
+    elif name.endswith(".xslx") or name.endswith(".xls"):
         data=pd.read_excel(path)
-    if name.endswith(".json"):
+    elif name.endswith(".json"):
         data=pd.read_json(path)
     else:
         raise ValueError("Type not supported")
@@ -99,7 +99,7 @@ def clean_data(data:pd.DataFrame)->pd.DataFrame:
     data = data.dropna()
 
 
-    data = pd.DataFrame(preprocessing.minmax_scale(data,axis=1),columns=data.columns)
+    data = (data-data.min())/(data.max()-data.min())
 
 
     return data
@@ -120,7 +120,7 @@ def get_params()->pd.DataFrame:
         parameters = json.load(json_file)
 
     distances=[]
-    for i in range(parameters["distances"]):
+    for i in parameters["distance"]:
         distances.append(distance(i))
 
     return (
