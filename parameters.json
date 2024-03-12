@@ -15,5 +15,8 @@
         "beta": [0.5,1,2],
         "l":5
     },
-    "substractive_clustering":{}
+    "substractive_clustering":{
+        "r_a":[0.3,0.5,0.8,1.2],
+        "r_b":[0.3,0.5,0.8,1.2]
+    }
 }

@@ -132,7 +132,8 @@ def get_params()->pd.DataFrame:
         parameters["mountain_clustering"].get("sigma"),
         parameters["mountain_clustering"].get("beta"),
         parameters["mountain_clustering"].get("l"),
-        parameters["substractive_clustering"]
+        parameters["substractive_clustering"].get("r_a"),
+        parameters["substractive_clustering"].get("r_b")
         
     )
 

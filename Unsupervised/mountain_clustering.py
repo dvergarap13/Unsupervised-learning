@@ -29,14 +29,21 @@ class mountain:
 
         self.data = np.array(data)
         self.V = utils.create_grid(l,self.data.shape[1])
-        self.distances = utils.matrix_distance(self.V,
+        self.distances_data = utils.matrix_distance(self.V,
                                                self.data,
                                                distance,
                                                arguments)
+
+        self.distances_grid = utils.matrix_distance(
+            self.V,
+            self.V,
+            distance,
+            arguments)
+        
         self.sigma=sigma
         self.beta=beta
 
-    def mountain_function(self,X:np.ndarray)->np.array:
+    def mountain_function(self)->np.array:
         '''
         mountain_function calculate the mountain height  for a vector of distance X
 
@@ -48,11 +55,11 @@ class mountain:
             np.array: _description_
         '''
         
-        m_height = np.sum(np.exp(-X**2/(2*self.sigma**2)),axis=1)
+        m_height = np.sum(np.exp(-self.distances_data**2/(2*self.sigma**2)),axis=1)
 
         return m_height
 
-    def destruction(self,m:np.array,index:int,d:np.ndarray)->np.array:
+    def destruction(self,m:np.ndarray,index:int)->np.array:
         '''
         destruction calculate the new potential clusters
 
@@ -64,7 +71,7 @@ class mountain:
         '''
         m_c=m[index]
 
-        m_new= m - np.exp( - d**2 / (2*self.beta**2) )*m_c
+        m_new= m - m_c*np.exp( - self.distances_grid[index]**2 / (2*self.beta**2) )
 
         return m_new
 
@@ -78,7 +85,7 @@ class mountain:
 
         centers_index=set()
 
-        mountain=self.mountain_function(self.distances)
+        mountain=self.mountain_function()
 
         center=np.argmax(mountain)
 
@@ -89,15 +96,16 @@ class mountain:
             if center in centers_index:
                 break
 
-            centers_index.add(center)
 
-            mountain = self.destruction(mountain,center,self.distances)
+            mountain = self.destruction(mountain,center)
+            
+            centers_index.add(center)
 
             center=np.argmax(mountain)
 
         centers_index.add(center)
 
-        centers=self.v[np.array(list(centers_index))]
+        centers=self.V[np.array(list(centers_index))]
         return centers_index,centers,mountain 
 
     def plot(self,centers:np.ndarray,name:str):
