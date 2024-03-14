@@ -32,7 +32,7 @@ def main():
     corrida = modelo.model(100)
 
 
-g    print(1)
+    print(1)
     
 
 
