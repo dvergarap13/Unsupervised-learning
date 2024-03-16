@@ -1,5 +1,7 @@
 from Unsupervised.mountain_clustering import mountain
 from Unsupervised.substracting_clustering import substracting
+from Unsupervised.kmeans import kmean
+from Unsupervised.fuzzy_cmeans import f_cmean
 
 from utils.utils import get_params,read_data,clean_data
 
@@ -23,15 +25,9 @@ def main():
 
     data = clean_data(data)
 
-    modelo = substracting(data=data,
-                          distance=distances[0],
-                          arguments=arguments[0],
-                          r_b=substractive_clustering_r_a[3],
-                          r_a=substractive_clustering_r_b[3])
+    modelo=f_cmean(data,4,2,distances[0],arguments[0])
 
-    corrida = modelo.model(100)
-
-
+    centroids = modelo.model(100,0.0001)
     print(1)
     
 

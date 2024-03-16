@@ -4,12 +4,11 @@ import numpy as np
 import pandas as pd
 import types
 
-class kmean:
+class f_cmean:
     def __init__(self,
                  data: pd.DataFrame,
-                 cluster: np.ndarray,
                  n_cluster: int,
-                 random:bool,
+                 m : int,
                  distance: types.FunctionType,
                  arguments: dict | None = None) -> None:
         '''
@@ -23,18 +22,12 @@ class kmean:
         '''
 
         self.data=np.array(data)
-        if random:
-            self.clusters= self.data[np.random.choice(self.data.shape[0],n_cluster,replace=False)]
-        else:
-            self.clusters=cluster
 
         self.distance=distance
         self.arguments=arguments
-        self.distances=utils.matrix_distance(
-            self.clusters,
-            self.data,
-            self.distance,
-            self.arguments)
+        self.n_cluster=n_cluster
+        self.m=m
+        self.membership_matrix=None
 
     def membership(self,d:np.ndarray)-> np.ndarray:
         '''
@@ -47,17 +40,16 @@ class kmean:
             np.ndarray: The membership matrix
         '''
 
-        index=np.argmin(d,axis=0)
+        rows, cols = np.where(d == 0)
+        if len(rows) > 0:
+            d[rows, cols] = 1e-10
+        for cluster in range(self.n_cluster):
+            self.membership_matrix[cluster] = 1 / np.sum(
+                (d[cluster] / (d)) ** (2 / (self.m - 1)),
+                axis=0,
+            )
 
-        U=np.zeros((self.clusters.shape[0],self.data.shape[0]))
-
-        cols=np.arange(self.data.shape[0])
-
-        U[index,cols]=1
-
-        return U
-
-    def cost_f(self,U:np.ndarray,d:np.ndarray):
+    def cost_f(self,c:np.ndarray):
         '''
         Compute the cost function
 
@@ -68,19 +60,28 @@ class kmean:
             np.ndarray: _
         '''
 
+        d= utils.matrix_distance(c,
+                                 self.data,
+                                 self.distance,
+                                 self.arguments)
 
-        return np.sum(U*d**2)
+        cost = np.sum(np.sum(self.membership_matrix**self.m * d**2))
 
-    def update(self,U:np.ndarray):
+
+        return cost,d
+
+    def update(self):
         '''
         Update center
 
         Args:
             U (np.ndarray): mempership matrix
         '''
+        clusters = np.zeros((self.n_cluster, self.data.shape[1]))
+        for i in range(clusters.shape[0]):
+            clusters[i] = np.sum(self.membership_matrix[i]**self.m*self.data.T,axis=1)/(np.sum(self.membership_matrix[i]**self.m))
 
-        for i in range(self.clusters.shape[0]):
-            self.clusters[i] = 1/np.sum(U[i])*(np.sum(U[i]*self.data.T,axis=1))
+        return clusters
 
     def model(self,n_iter:int,tol):
         '''
@@ -95,33 +96,19 @@ class kmean:
 
         p_loss=np.inf
 
+        self.membership_matrix = np.random.rand(self.n_cluster,self.data.shape[0])
+
         for _ in range(n_iter):
+            clusters = self.update()
 
 
-            membership = self.membership(self.distances)
+            loss,distances = self.cost_f(clusters)
 
-            self.update(membership)
-
-            loss = self.cost_f(membership,self.distances)
 
             if  np.abs(p_loss-loss) < tol :
                 break
 
             p_loss = loss
+            self.membership(distances)
 
-        labels = np.argmax(membership,axis=0)
-
-        return labels,self.clusters
-
-    
-
-        
-
-        
-
-          
-        
-
-        
-        
-        
+        return clusters,self.membership_matrix
